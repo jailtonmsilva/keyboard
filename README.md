@@ -1,4 +1,4 @@
-# keyboard
+# Keyboard
 
 Aplicativo desktop para Windows que ativa/desativa o teclado interno via interface grafica.
 
