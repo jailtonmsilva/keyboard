@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Perguntas gerais
+    url: https://github.com/jailtonmsilva/keyboard/discussions
+    about: Use Discussions ou canal de comunicacao do projeto para perguntas gerais.
