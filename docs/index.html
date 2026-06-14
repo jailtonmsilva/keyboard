@@ -4,221 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Para Você - Love S2 Nic</title>
-    <style>
-      :root {
-        color-scheme: light;
-        /* Paleta Temática: Amor / Dia do Amor */
-        --bg: #FDF2F8;
-        --panel: #FFFFFF;
-        --text: #4A0E17;
-        --muted: #8B5A62;
-        --accent: #BE123C;
-        --accent-strong: #9F1239;
-        --border: rgba(190, 18, 60, 0.15);
-        --shadow: 0 18px 50px rgba(74, 14, 23, 0.1);
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: "Segoe UI", Tahoma, sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(190, 18, 60, 0.08), transparent 28%),
-          radial-gradient(circle at bottom right, rgba(159, 18, 57, 0.05), transparent 24%),
-          var(--bg);
-        color: var(--text);
-      }
-      
-      /* --- TELA DE SOBREPOSIÇÃO (OVERLAY PARA AUTOPLAY) --- */
-      #overlay {
-        position: fixed;
-        inset: 0;
-        background: var(--bg);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-        transition: opacity 0.8s ease;
-      }
-      .heart-icon {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        animation: pulse 1.5s infinite;
-      }
-      @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
-      }
-      .btn-start {
-        appearance: none;
-        border: 0;
-        border-radius: 999px;
-        padding: 18px 32px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        box-shadow: 0 12px 26px rgba(190, 18, 60, 0.25);
-        cursor: pointer;
-        transition: transform 0.2s ease;
-      }
-      .btn-start:hover {
-        transform: translateY(-2px);
-      }
-
-      /* --- CONTEÚDO PRINCIPAL --- */
-      #mainContent {
-        display: none; /* Fica oculto até o clique */
-        opacity: 0;
-        transition: opacity 1.5s ease;
-        min-height: 100vh;
-        place-items: center;
-        padding: 32px;
-      }
-      .wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 32px;
-        max-width: 1100px;
-        width: 100%;
-        justify-content: center;
-      }
-      .card {
-        flex: 1;
-        min-width: 320px;
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid var(--border);
-        border-radius: 28px;
-        box-shadow: var(--shadow);
-        padding: 40px;
-        backdrop-filter: blur(8px);
-      }
-      
-      /* --- ESTILOS DO TEXTO E COMPONENTES --- */
-      .eyebrow {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: rgba(190, 18, 60, 0.08);
-        color: var(--accent-strong);
-        font-size: 0.92rem;
-        letter-spacing: 0.02em;
-        margin-bottom: 18px;
-        font-weight: 600;
-      }
-      h1 {
-        margin: 0 0 12px;
-        font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-        line-height: 1.1;
-      }
-      h2 {
-        margin: 0 0 16px;
-        font-size: clamp(1.6rem, 3vw, 2.2rem);
-        color: var(--accent-strong);
-      }
-      p {
-        margin: 0 0 16px;
-        color: var(--muted);
-        font-size: 1.05rem;
-        line-height: 1.7;
-      }
-      .message-text p {
-        font-size: 1.15rem;
-        line-height: 1.8;
-      }
-      
-      /* --- CHIPS DA VERSÃO --- */
-      .meta {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 14px;
-        margin: 28px 0;
-      }
-      .chip {
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 16px;
-        background: var(--bg);
-      }
-      .chip span {
-        display: block;
-        color: var(--muted);
-        font-size: 0.88rem;
-        margin-bottom: 6px;
-      }
-      .chip strong {
-        font-size: 1rem;
-      }
-      
-      /* --- BOTÕES --- */
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px;
-        margin-top: 12px;
-      }
-      .button {
-        appearance: none;
-        border: 0;
-        border-radius: 999px;
-        padding: 14px 22px;
-        text-decoration: none;
-        font-weight: 700;
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
-        text-align: center;
-      }
-      .button:hover {
-        transform: translateY(-1px);
-      }
-      .primary {
-        color: #fff;
-        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        box-shadow: 0 12px 26px rgba(190, 18, 60, 0.22);
-      }
-      .secondary {
-        color: var(--accent-strong);
-        background: #fff;
-        border: 1px solid var(--accent);
-      }
-      footer {
-        margin-top: 28px;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-      
-      @media (max-width: 768px) {
-        .card { padding: 28px; border-radius: 22px; }
-        .actions { flex-direction: column; }
-        .button { width: 100%; }
-        .wrapper { gap: 20px; }
-      }
-    </style>
+    <link rel="stylesheet" href="./assets/css/main.css" />
   </head>
   <body>
 
+    <!-- OVERLAY: desbloqueio de autoplay -->
     <div id="overlay">
       <div class="heart-icon">❤️</div>
       <button class="btn-start" id="startBtn">Tenho uma mensagem para você. Clique aqui</button>
     </div>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <main id="mainContent">
       <div class="wrapper">
-        
+
+        <!-- CARD: mensagem pessoal -->
         <section class="card message-text">
           <h2>Meu amor, me perdoa!</h2>
           <p>
-            Sei que as palavras às vezes faltam, por isso busquei uma forma diferente de tentar expressar o quanto você é essencial na minha vida. Errei, sinto muito mesmo, e a minha maior dedicação sempre será o nosso amor.
+            Sei que as palavras às vezes faltam, por isso busquei uma forma diferente de tentar
+            expressar o quanto você é essencial na minha vida. Errei, sinto muito mesmo, e a minha
+            maior dedicação sempre será o nosso amor.
           </p>
-          <p>
-            Quero continuar construindo a nossa história, superando os obstáculos e realizando o nosso lindo plano...
-          </p>
-          <p>
-            <strong>Eu te amo infinitamente !!!</strong>
-          </p>
+          <p>Quero continuar construindo a nossa história, superando os obstáculos e realizando o nosso lindo plano...</p>
+          <p><strong>Eu te amo infinitamente !!!</strong></p>
         </section>
 
+        <!-- CARD: download do aplicativo -->
         <section class="card">
           <div class="eyebrow">Love S2 Nic • v1.0.0</div>
           <h1>Download do aplicativo</h1>
@@ -254,35 +66,6 @@
       </div>
     </main>
 
-    <script>
-      // Lógica para reprodução e transição de tela
-      const overlay = document.getElementById('overlay');
-      const mainContent = document.getElementById('mainContent');
-      const startBtn = document.getElementById('startBtn');
-
-      // Arquivo solicitado pelo projeto.
-      const audio = new Audio('./audio/pra_voce_guardei_o_amor.mp3');
-
-      // Ação do botão de início
-      startBtn.addEventListener('click', () => {
-        // Inicia a música
-        audio.play().catch(error => {
-          console.log("Erro ao reproduzir o áudio. Verifique se o arquivo foi publicado em docs/audio.", error);
-        });
-
-        // Transição suave para esconder o overlay e mostrar o conteúdo
-        overlay.style.opacity = '0';
-        
-        setTimeout(() => {
-          overlay.style.display = 'none';
-          mainContent.style.display = 'grid'; // Usa grid/flex para centralizar
-          
-          // Pequeno delay para o fade-in funcionar perfeitamente
-          setTimeout(() => {
-            mainContent.style.opacity = '1';
-          }, 50);
-        }, 800); // 800ms é o tempo da transição do CSS
-      });
-    </script>
+    <script src="./assets/js/main.js" defer></script>
   </body>
 </html>
