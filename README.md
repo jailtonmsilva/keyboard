@@ -2,6 +2,10 @@
 
 Aplicativo desktop para Windows que ativa/desativa o teclado interno via interface grafica, na versao v1.0.0.
 
+Pagina publica de download do EXE:
+
+- https://jailtonmsilva.github.io/keyboard/
+
 ## Objetivo deste guia
 
 Este README documenta o passo a passo para montar o ambiente de desenvolvimento local, executar o projeto e gerar o executavel.

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Love S2 Nic - Download</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5efe8;
+        --panel: #fffaf6;
+        --text: #1f1a17;
+        --muted: #665c55;
+        --accent: #8f5f4a;
+        --accent-strong: #6f4635;
+        --border: rgba(111, 70, 53, 0.14);
+        --shadow: 0 18px 50px rgba(44, 30, 24, 0.14);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(143, 95, 74, 0.16), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(111, 70, 53, 0.12), transparent 24%),
+          var(--bg);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 32px;
+      }
+      .card {
+        width: min(760px, 100%);
+        background: rgba(255, 250, 246, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 40px;
+        backdrop-filter: blur(8px);
+      }
+      .eyebrow {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(143, 95, 74, 0.1);
+        color: var(--accent-strong);
+        font-size: 0.92rem;
+        letter-spacing: 0.02em;
+        margin-bottom: 18px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        line-height: 1.05;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin: 28px 0;
+      }
+      .chip {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px 18px;
+        background: #fff;
+      }
+      .chip span {
+        display: block;
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin-bottom: 6px;
+      }
+      .chip strong {
+        font-size: 1rem;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .button {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 22px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+      .button:hover {
+        transform: translateY(-1px);
+      }
+      .primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        box-shadow: 0 12px 26px rgba(111, 70, 53, 0.22);
+      }
+      .secondary {
+        color: var(--accent-strong);
+        background: #fff;
+        border: 1px solid var(--border);
+      }
+      code {
+        background: rgba(111, 70, 53, 0.08);
+        padding: 2px 7px;
+        border-radius: 8px;
+      }
+      footer {
+        margin-top: 28px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      @media (max-width: 640px) {
+        .card { padding: 24px; border-radius: 22px; }
+        .actions { flex-direction: column; }
+        .button { text-align: center; width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="eyebrow">Love S2 Nic • v1.0.0</div>
+      <h1>Download do executável</h1>
+      <p>
+        Esta página fornece acesso público ao EXE versionado do aplicativo.
+        O download abaixo aponta para a versão publicada no GitHub Pages.
+      </p>
+
+      <section class="meta" aria-label="Informações da versão">
+        <div class="chip">
+          <span>Aplicativo</span>
+          <strong>Love S2 Nic</strong>
+        </div>
+        <div class="chip">
+          <span>Versão</span>
+          <strong>1.0.0</strong>
+        </div>
+        <div class="chip">
+          <span>Plataforma</span>
+          <strong>Windows</strong>
+        </div>
+      </section>
+
+      <div class="actions">
+        <a class="button primary" href="./downloads/v1.0.0/love_nic.exe" download>Baixar EXE v1.0.0</a>
+        <a class="button secondary" href="https://github.com/jailtonmsilva/keyboard">Ver repositório</a>
+      </div>
+
+      <footer>
+        Se o GitHub Pages ainda não estiver habilitado no repositório, o link ficará ativo assim que a publicação do workflow concluir.
+      </footer>
+    </main>
+  </body>
+</html>
