@@ -39,7 +39,9 @@ jobs:
       - name: Prepare Pages content
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Force -Path docs/audio | Out-Null
           New-Item -ItemType Directory -Force -Path docs/downloads/v1.0.0 | Out-Null
+          Copy-Item -Force projeto/src/mp3/pra_voce_guardei_o_amor.mp3 docs/audio/pra_voce_guardei_o_amor.mp3
           Copy-Item -Force dist/love_nic.exe docs/downloads/v1.0.0/love_nic.exe
 
       - name: Upload Pages artifact
