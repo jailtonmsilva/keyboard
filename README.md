@@ -1,6 +1,6 @@
-# Keyboard
+# Love S2 Nic
 
-Aplicativo desktop para Windows que ativa/desativa o teclado interno via interface grafica.
+Aplicativo desktop para Windows que ativa/desativa o teclado interno via interface grafica, na versao v1.0.0.
 
 ## Objetivo deste guia
 

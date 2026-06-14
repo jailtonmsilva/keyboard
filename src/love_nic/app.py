@@ -6,6 +6,8 @@ import customtkinter as ctk
 from ctypes import wintypes
 from PIL import Image, ImageDraw, ImageOps
 
+from love_nic.config.constants import WINDOW_SIZE, WINDOW_TITLE
+
 # =======================================================
 # UTILITÁRIOS PARA O EXECUTÁVEL E ARQUIVOS
 # =======================================================
@@ -83,7 +85,7 @@ def is_admin():
     """Verifica se o script tem privilégios de administrador."""
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
+    except Exception:
         return False
 
 def get_dev_node(instance_id):
@@ -138,8 +140,8 @@ class LoveApp(ctk.CTk):
         self.previous_volume = self.volume_level
 
         # Configurações da Janela Fixa
-        self.title("🤎 Love S2 - Ativa/Desativa Teclado Interno [ v1.0 ] 🤎")
-        self.geometry("900x650")
+        self.title(WINDOW_TITLE)
+        self.geometry(WINDOW_SIZE)
         self.resizable(False, False)
         ctk.set_appearance_mode("light")
 
