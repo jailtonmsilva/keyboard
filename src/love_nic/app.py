@@ -2,11 +2,15 @@ import sys
 import os
 import wmi
 import ctypes
+import logging
 import customtkinter as ctk
 from ctypes import wintypes
 from PIL import Image, ImageDraw, ImageOps
 
-from love_nic.config.constants import WINDOW_SIZE, WINDOW_TITLE
+from love_nic.config.constants import FALLBACK_KEYBOARD_ID, WINDOW_SIZE, WINDOW_TITLE
+from love_nic.utils.app_logger import install_global_exception_logging, log_event
+
+install_global_exception_logging()
 
 # =======================================================
 # UTILITÁRIOS PARA O EXECUTÁVEL E ARQUIVOS
@@ -36,6 +40,16 @@ def obter_id_teclado_interno():
             if teclado.DeviceID.startswith("ACPI"):
                 return teclado.DeviceID
     except Exception as e:
+        log_event(
+            source="KEYBOARD",
+            message="Falha ao buscar teclado via WMI.",
+            level=logging.ERROR,
+            context={
+                "status": "UNKNOWN",
+                "erro": str(e),
+            },
+            exc_info=True,
+        )
         print(f"Erro ao buscar teclado via WMI: {e}")
     return None
 
@@ -47,7 +61,16 @@ TECLADO_ID = obter_id_teclado_interno()
 
 if not TECLADO_ID:
     print("⚠️ Teclado ACPI não encontrado dinamicamente.")
-    TECLADO_ID = r"ACPI\PNP0303\4&12A3B4C5&0"  # O seu ID original como garantia
+    TECLADO_ID = FALLBACK_KEYBOARD_ID
+    log_event(
+        source="KEYBOARD",
+        message="Teclado ACPI não encontrado dinamicamente. Usando fallback.",
+        level=logging.WARNING,
+        context={
+            "fallback_id": TECLADO_ID,
+            "status": "UNKNOWN",
+        },
+    )
 
 # Constantes da API do Windows (cfgmgr32.dll)
 CR_SUCCESS = 0
@@ -75,6 +98,16 @@ try:
     CM_Get_DevNode_Status.restype = ctypes.c_ulong
 
 except Exception as e:
+    log_event(
+        source="APP",
+        message="Falha ao carregar API do Windows.",
+        level=logging.ERROR,
+        context={
+            "status": "UNKNOWN",
+            "erro": str(e),
+        },
+        exc_info=True,
+    )
     print(f"Erro ao carregar a API do Windows: {e}")
     sys.exit(1)
 
@@ -120,6 +153,12 @@ def set_device_state(instance_id, enable=True):
 
 # Reinicia pedindo privilégios se não for admin
 if not is_admin():
+    log_event(
+        source="APP",
+        message="Aplicativo sem privilégios de administrador. Solicitando elevação.",
+        level=logging.WARNING,
+        context={"status": "UNKNOWN"},
+    )
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
     sys.exit()
 
@@ -295,7 +334,43 @@ class LoveApp(ctk.CTk):
 
         # Verifica o status do hardware e atualiza a interface ao abrir
         self.check_initial_status()
+        log_event(
+            source="APP",
+            message="Interface gráfica inicializada com sucesso e pronta.",
+            context={"status": self._current_keyboard_state()},
+        )
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def report_callback_exception(self, exc, val, tb):
+        log_event(
+            source="APP",
+            message="Erro em callback da interface grafica.",
+            level=logging.ERROR,
+            context={
+                "status": self._current_keyboard_state(),
+                "erro": f"{exc.__name__}: {val}",
+            },
+            exc_info=(exc, val, tb),
+        )
+
+    def _current_keyboard_state(self):
+        if not TECLADO_ID:
+            return "UNKNOWN"
+
+        try:
+            return "ON" if is_device_enabled(TECLADO_ID) else "OFF"
+        except Exception as e:
+            log_event(
+                source="KEYBOARD",
+                message="Falha ao consultar estado atual do teclado.",
+                level=logging.ERROR,
+                context={
+                    "status": "UNKNOWN",
+                    "erro": str(e),
+                },
+                exc_info=True,
+            )
+            return "UNKNOWN"
 
     # =======================================================
     # EVENTOS DA INTERFACE
@@ -305,34 +380,108 @@ class LoveApp(ctk.CTk):
         if not TECLADO_ID:
             self.lbl_title_toggle.configure(text="Teclado não detectado")
             self.switch.configure(state="disabled")
+            log_event(
+                source="KEYBOARD",
+                message="Teclado interno não detectado na inicialização.",
+                level=logging.WARNING,
+                context={"status": "UNKNOWN"},
+            )
             return
 
-        if is_device_enabled(TECLADO_ID):
+        estado_inicial = self._current_keyboard_state()
+        if estado_inicial == "ON":
             self.switch.select()
             self.lbl_title_toggle.configure(text="Teclado interno  ON")
         else:
             self.switch.deselect()
             self.lbl_title_toggle.configure(text="Teclado interno OFF")
 
+        log_event(
+            source="KEYBOARD",
+            message="Estado inicial do teclado registrado.",
+            context={"status": estado_inicial},
+        )
+
     def toggle_event(self):
         """Disparado quando o usuário clica no botão ON/OFF."""
         if not TECLADO_ID:
+            log_event(
+                source="KEYBOARD",
+                message="Não foi possível alterar estado: teclado interno não detectado.",
+                level=logging.ERROR,
+                context={
+                    "status": "UNKNOWN",
+                    "erro": "teclado interno não detectado",
+                },
+            )
             return
 
+        estado_anterior = self._current_keyboard_state()
         estado_atual = self.switch_var.get()
+        estado_desejado = "ON" if estado_atual == "on" else "OFF"
+
+        log_event(
+            source="KEYBOARD",
+            message="Solicitação de alteração de estado recebida.",
+            context={
+                "de": estado_anterior,
+                "para": estado_desejado,
+            },
+        )
         
-        if estado_atual == "on":
-            sucesso = set_device_state(TECLADO_ID, enable=True)
-            if sucesso:
-                self.lbl_title_toggle.configure(text="Teclado interno  ON")
+        try:
+            if estado_atual == "on":
+                sucesso = set_device_state(TECLADO_ID, enable=True)
+                if sucesso:
+                    self.lbl_title_toggle.configure(text="Teclado interno  ON")
+                else:
+                    self.switch.deselect()
             else:
-                self.switch.deselect()
-        else:
-            sucesso = set_device_state(TECLADO_ID, enable=False)
-            if sucesso:
-                self.lbl_title_toggle.configure(text="Teclado interno OFF")
-            else:
-                self.switch.select()
+                sucesso = set_device_state(TECLADO_ID, enable=False)
+                if sucesso:
+                    self.lbl_title_toggle.configure(text="Teclado interno OFF")
+                else:
+                    self.switch.select()
+        except Exception as e:
+            self.switch.select() if estado_anterior == "ON" else self.switch.deselect()
+            log_event(
+                source="KEYBOARD",
+                message="Falha ao alterar estado do teclado interno via API do Windows.",
+                level=logging.ERROR,
+                context={
+                    "status": estado_anterior,
+                    "de": estado_anterior,
+                    "para": estado_desejado,
+                    "erro": str(e),
+                },
+                exc_info=True,
+            )
+            return
+
+        estado_resultante = self._current_keyboard_state()
+        if sucesso:
+            log_event(
+                source="KEYBOARD",
+                message="Estado do teclado alterado com sucesso.",
+                context={
+                    "status": estado_resultante,
+                    "de": estado_anterior,
+                    "para": estado_resultante,
+                },
+            )
+            return
+
+        log_event(
+            source="KEYBOARD",
+            message="Falha ao alterar estado do teclado interno via API do Windows.",
+            level=logging.ERROR,
+            context={
+                "status": estado_resultante,
+                "de": estado_anterior,
+                "para": estado_desejado,
+                    "erro": "API do Windows retornou falha sem exceção.",
+            },
+        )
 
     def init_music(self):
         """Carrega o mp3 e inicia reproducao em loop usando player nativo do Windows."""
@@ -406,14 +555,53 @@ class LoveApp(ctk.CTk):
         self.is_muted = True
 
     def on_close(self):
-        if self.music_ready:
-            mci_send(f"stop {self.media_alias}")
-            mci_send(f"close {self.media_alias}")
+        try:
+            if self.music_ready:
+                mci_send(f"stop {self.media_alias}")
+                mci_send(f"close {self.media_alias}")
+        except Exception as e:
+            log_event(
+                source="APP",
+                message="Falha ao fechar recursos de audio.",
+                level=logging.ERROR,
+                context={
+                    "status": self._current_keyboard_state(),
+                    "erro": str(e),
+                },
+                exc_info=True,
+            )
+
+        log_event(
+            source="APP",
+            message="Aplicação finalizada pelo usuário.",
+            context={"status": self._current_keyboard_state()},
+        )
         self.destroy()
 
 def main():
+    log_event(
+        source="APP",
+        message="Aplicação iniciada com sucesso.",
+        context={
+            "status": "UNKNOWN",
+            "teclado_id": TECLADO_ID,
+        },
+    )
     app = LoveApp()
-    app.mainloop()
+    try:
+        app.mainloop()
+    except Exception as e:
+        log_event(
+            source="APP",
+            message="Erro durante execucao principal.",
+            level=logging.ERROR,
+            context={
+                "status": app._current_keyboard_state(),
+                "erro": str(e),
+            },
+            exc_info=True,
+        )
+        raise
 
 
 if __name__ == "__main__":
